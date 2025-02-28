@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Function to display a random quote
-    function showRandomQuote() {
+    function displayRandomQuote() {
         if (quotes.length === 0) {
             quoteDisplay.textContent = "No quotes available.";
             return;
@@ -59,6 +59,6 @@ document.addEventListener("DOMContentLoaded", () => {
     loadQuotesFromStorage();
 
     // Event listeners
-    newQuoteBtn.addEventListener("click", showRandomQuote);
+    newQuoteBtn.addEventListener("click", displayRandomQuote);
     addQuoteBtn.addEventListener("click", addQuote);
 });
