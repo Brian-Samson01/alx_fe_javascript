@@ -5,21 +5,33 @@ document.addEventListener("DOMContentLoaded", () => {
     const newQuoteText = document.getElementById("newQuoteText");
     const newQuoteCategory = document.getElementById("newQuoteCategory");
 
+    // Ensure quotes array exists
     let quotes = [
         { text: "The purpose of our lives is to be happy.", category: "Life" },
         { text: "Success is not the key to happiness. Happiness is the key to success.", category: "Success" },
         { text: "Do what you can, with what you have, where you are.", category: "Motivation" }
     ];
 
+    // Load quotes from local storage if available
+    function loadQuotesFromStorage() {
+        const storedQuotes = JSON.parse(localStorage.getItem("quotes"));
+        if (Array.isArray(storedQuotes)) {
+            quotes = storedQuotes;
+        }
+    }
+
+    // Function to display a random quote
     function showRandomQuote() {
         if (quotes.length === 0) {
             quoteDisplay.textContent = "No quotes available.";
             return;
         }
         const randomIndex = Math.floor(Math.random() * quotes.length);
-        quoteDisplay.textContent = `"${quotes[randomIndex].text}" - ${quotes[randomIndex].category}`;
+        const randomQuote = quotes[randomIndex];
+        quoteDisplay.textContent = `"${randomQuote.text}" - ${randomQuote.category}`;
     }
 
+    // Function to add a new quote
     function addQuote() {
         const text = newQuoteText.value.trim();
         const category = newQuoteCategory.value.trim();
@@ -29,23 +41,24 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        quotes.push({ text, category });
+        // Create a new quote object
+        const newQuote = { text, category };
+        quotes.push(newQuote);
+
+        // Update Local Storage
         localStorage.setItem("quotes", JSON.stringify(quotes));
 
+        // Clear input fields
         newQuoteText.value = "";
         newQuoteCategory.value = "";
 
         alert("Quote added successfully!");
     }
 
-    function loadQuotesFromStorage() {
-        const storedQuotes = JSON.parse(localStorage.getItem("quotes"));
-        if (storedQuotes) {
-            quotes = storedQuotes;
-        }
-    }
-
+    // Load stored quotes on page load
     loadQuotesFromStorage();
+
+    // Event listeners
     newQuoteBtn.addEventListener("click", showRandomQuote);
     addQuoteBtn.addEventListener("click", addQuote);
 });
