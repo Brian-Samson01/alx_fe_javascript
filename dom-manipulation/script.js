@@ -1,12 +1,22 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const quotes = [
+    const quoteDisplay = document.getElementById("quoteDisplay");
+    const newQuoteBtn = document.getElementById("newQuote");
+    const importFileInput = document.createElement("input");
+    importFileInput.type = "file";
+    importFileInput.id = "importFile";
+    importFileInput.accept = ".json";
+    importFileInput.onchange = importFromJsonFile;
+    document.body.appendChild(importFileInput);
+
+    let quotes = JSON.parse(localStorage.getItem("quotes")) || [
         { text: "The only limit to our realization of tomorrow is our doubts of today.", category: "Motivation" },
         { text: "In the middle of every difficulty lies opportunity.", category: "Inspiration" },
         { text: "Life is 10% what happens to us and 90% how we react to it.", category: "Life" }
     ];
 
-    const quoteDisplay = document.getElementById("quoteDisplay");
-    const newQuoteBtn = document.getElementById("newQuote");
+    function saveQuotes() {
+        localStorage.setItem("quotes", JSON.stringify(quotes));
+    }
 
     function showRandomQuote() {
         if (quotes.length === 0) {
@@ -16,6 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const randomIndex = Math.floor(Math.random() * quotes.length);
         const selectedQuote = quotes[randomIndex];
         quoteDisplay.innerHTML = `"${selectedQuote.text}" - (${selectedQuote.category})`;
+        sessionStorage.setItem("lastViewedQuote", quoteDisplay.innerHTML);
     }
 
     function createAddQuoteForm() {
@@ -52,13 +63,40 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         
         quotes.push({ text: newQuoteText, category: newQuoteCategory });
+        saveQuotes();
         document.getElementById("newQuoteText").value = "";
         document.getElementById("newQuoteCategory").value = "";
         alert("Quote added successfully!");
         
-        // Update the DOM immediately after adding a new quote
         showRandomQuote();
     }
+
+    function exportToJsonFile() {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(quotes));
+        const downloadAnchor = document.createElement("a");
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute("download", "quotes.json");
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        document.body.removeChild(downloadAnchor);
+    }
+
+    function importFromJsonFile(event) {
+        const fileReader = new FileReader();
+        fileReader.onload = function(event) {
+            const importedQuotes = JSON.parse(event.target.result);
+            quotes.push(...importedQuotes);
+            saveQuotes();
+            alert('Quotes imported successfully!');
+            showRandomQuote();
+        };
+        fileReader.readAsText(event.target.files[0]);
+    }
+
+    const exportButton = document.createElement("button");
+    exportButton.innerText = "Export Quotes";
+    exportButton.addEventListener("click", exportToJsonFile);
+    document.body.appendChild(exportButton);
 
     newQuoteBtn.addEventListener("click", () => {
         console.log("Show New Quote button clicked");
@@ -67,4 +105,9 @@ document.addEventListener("DOMContentLoaded", () => {
     
     createAddQuoteForm();
     showRandomQuote();
+
+    const lastViewedQuote = sessionStorage.getItem("lastViewedQuote");
+    if (lastViewedQuote) {
+        quoteDisplay.innerHTML = lastViewedQuote;
+    }
 });
