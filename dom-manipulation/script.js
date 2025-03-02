@@ -18,6 +18,8 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.setItem("quotes", JSON.stringify(quotes));
     }
 
+    saveQuotes(); // Ensure initial quotes are saved to local storage if not present
+
     function showRandomQuote() {
         if (quotes.length === 0) {
             quoteDisplay.innerHTML = "No quotes available. Please add a new one.";
@@ -84,11 +86,16 @@ document.addEventListener("DOMContentLoaded", () => {
     function importFromJsonFile(event) {
         const fileReader = new FileReader();
         fileReader.onload = function(event) {
-            const importedQuotes = JSON.parse(event.target.result);
-            quotes.push(...importedQuotes);
-            saveQuotes();
-            alert('Quotes imported successfully!');
-            showRandomQuote();
+            try {
+                const importedQuotes = JSON.parse(event.target.result);
+                if (!Array.isArray(importedQuotes)) throw new Error("Invalid JSON format");
+                quotes.push(...importedQuotes);
+                saveQuotes();
+                alert('Quotes imported successfully!');
+                showRandomQuote();
+            } catch (error) {
+                alert("Error importing quotes: " + error.message);
+            }
         };
         fileReader.readAsText(event.target.files[0]);
     }
@@ -104,10 +111,11 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     
     createAddQuoteForm();
-    showRandomQuote();
 
     const lastViewedQuote = sessionStorage.getItem("lastViewedQuote");
     if (lastViewedQuote) {
         quoteDisplay.innerHTML = lastViewedQuote;
+    } else {
+        showRandomQuote(); // Ensure a quote is displayed if session storage is empty
     }
 });
