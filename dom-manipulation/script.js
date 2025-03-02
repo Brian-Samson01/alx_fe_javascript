@@ -10,11 +10,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function showRandomQuote() {
         if (quotes.length === 0) {
-            quoteDisplay.innerText = "No quotes available. Please add a new one.";
+            quoteDisplay.innerHTML = "No quotes available. Please add a new one.";
             return;
         }
         const randomIndex = Math.floor(Math.random() * quotes.length);
-        quoteDisplay.innerText = `"${quotes[randomIndex].text}" - (${quotes[randomIndex].category})`;
+        const selectedQuote = quotes[randomIndex];
+        quoteDisplay.innerHTML = `"${selectedQuote.text}" - (${selectedQuote.category})`;
     }
 
     function createAddQuoteForm() {
@@ -54,9 +55,16 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("newQuoteText").value = "";
         document.getElementById("newQuoteCategory").value = "";
         alert("Quote added successfully!");
+        
+        // Update the DOM immediately after adding a new quote
+        showRandomQuote();
     }
 
-    newQuoteBtn.addEventListener("click", showRandomQuote);
+    newQuoteBtn.addEventListener("click", () => {
+        console.log("Show New Quote button clicked");
+        showRandomQuote();
+    });
+    
     createAddQuoteForm();
     showRandomQuote();
 });
