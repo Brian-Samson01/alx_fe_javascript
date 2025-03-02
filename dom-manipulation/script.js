@@ -1,8 +1,12 @@
 document.addEventListener("DOMContentLoaded", () => {
     const quoteDisplay = document.getElementById("quoteDisplay");
     const newQuoteBtn = document.getElementById("newQuote");
-    const exportButton = document.getElementById("exportQuotes");
-    const importFileInput = document.getElementById("importFile");
+    const importFileInput = document.createElement("input");
+    importFileInput.type = "file";
+    importFileInput.id = "importFile";
+    importFileInput.accept = ".json";
+    importFileInput.onchange = importFromJsonFile;
+    document.body.appendChild(importFileInput);
 
     let quotes = JSON.parse(localStorage.getItem("quotes")) || [
         { text: "The only limit to our realization of tomorrow is our doubts of today.", category: "Motivation" },
@@ -14,7 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.setItem("quotes", JSON.stringify(quotes));
     }
 
-    saveQuotes(); // Ensure initial quotes are saved if not present
+    saveQuotes(); // Ensure initial quotes are saved to local storage if not present
 
     function showRandomQuote() {
         if (quotes.length === 0) {
@@ -70,13 +74,19 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function exportToJsonFile() {
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(quotes));
+        const jsonData = JSON.stringify(quotes, null, 2); // Pretty-printed JSON
+        const blob = new Blob([jsonData], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        
         const downloadAnchor = document.createElement("a");
-        downloadAnchor.setAttribute("href", dataStr);
-        downloadAnchor.setAttribute("download", "quotes.json");
+        downloadAnchor.href = url;
+        downloadAnchor.download = "quotes.json";
+        
         document.body.appendChild(downloadAnchor);
         downloadAnchor.click();
         document.body.removeChild(downloadAnchor);
+        
+        URL.revokeObjectURL(url); // Cleanup
     }
 
     function importFromJsonFile(event) {
@@ -96,10 +106,18 @@ document.addEventListener("DOMContentLoaded", () => {
         fileReader.readAsText(event.target.files[0]);
     }
 
-    // Attach event listeners
-    newQuoteBtn.addEventListener("click", showRandomQuote);
-    exportButton.addEventListener("click", exportToJsonFile);
-    importFileInput.addEventListener("change", importFromJsonFile);
+    if (!document.getElementById("exportQuotesButton")) {
+        const exportButton = document.createElement("button");
+        exportButton.id = "exportQuotesButton";
+        exportButton.innerText = "Export Quotes";
+        exportButton.addEventListener("click", exportToJsonFile);
+        document.body.appendChild(exportButton);
+    }
+
+    newQuoteBtn.addEventListener("click", () => {
+        console.log("Show New Quote button clicked");
+        showRandomQuote();
+    });
     
     createAddQuoteForm();
 
