@@ -1,12 +1,8 @@
 document.addEventListener("DOMContentLoaded", () => {
     const quoteDisplay = document.getElementById("quoteDisplay");
     const newQuoteBtn = document.getElementById("newQuote");
-    const importFileInput = document.createElement("input");
-    importFileInput.type = "file";
-    importFileInput.id = "importFile";
-    importFileInput.accept = ".json";
-    importFileInput.onchange = importFromJsonFile;
-    document.body.appendChild(importFileInput);
+    const exportButton = document.getElementById("exportQuotes");
+    const importFileInput = document.getElementById("importFile");
 
     let quotes = JSON.parse(localStorage.getItem("quotes")) || [
         { text: "The only limit to our realization of tomorrow is our doubts of today.", category: "Motivation" },
@@ -18,7 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.setItem("quotes", JSON.stringify(quotes));
     }
 
-    saveQuotes(); // Ensure initial quotes are saved to local storage if not present
+    saveQuotes(); // Ensure initial quotes are saved if not present
 
     function showRandomQuote() {
         if (quotes.length === 0) {
@@ -100,15 +96,10 @@ document.addEventListener("DOMContentLoaded", () => {
         fileReader.readAsText(event.target.files[0]);
     }
 
-    const exportButton = document.createElement("button");
-    exportButton.innerText = "Export Quotes";
+    // Attach event listeners
+    newQuoteBtn.addEventListener("click", showRandomQuote);
     exportButton.addEventListener("click", exportToJsonFile);
-    document.body.appendChild(exportButton);
-
-    newQuoteBtn.addEventListener("click", () => {
-        console.log("Show New Quote button clicked");
-        showRandomQuote();
-    });
+    importFileInput.addEventListener("change", importFromJsonFile);
     
     createAddQuoteForm();
 
