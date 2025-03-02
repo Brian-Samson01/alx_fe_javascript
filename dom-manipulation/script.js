@@ -14,19 +14,28 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.setItem("quotes", JSON.stringify(quotes));
     }
 
-    async function syncWithServer() {
+    async function fetchQuotesFromServer() {
         try {
             const response = await fetch(serverURL);
             const serverQuotes = await response.json();
-            if (Array.isArray(serverQuotes)) {
-                quotes = [...serverQuotes.map(q => ({ text: q.title, category: "General" })), ...quotes];
+            return serverQuotes.map(q => ({ text: q.title, category: "General" }));
+        } catch (error) {
+            console.error("Error fetching quotes from server:", error);
+            return [];
+        }
+    }
+
+    async function syncQuotes() {
+        const serverQuotes = await fetchQuotesFromServer();
+        if (serverQuotes.length) {
+            const newQuotes = serverQuotes.filter(sq => !quotes.some(lq => lq.text === sq.text));
+            if (newQuotes.length) {
+                quotes = [...newQuotes, ...quotes];
                 saveQuotes();
                 populateCategories();
                 showRandomQuote();
-                alert("Quotes synced with the server.");
+                alert("New quotes synced from the server.");
             }
-        } catch (error) {
-            console.error("Error syncing with server:", error);
         }
     }
 
@@ -122,5 +131,5 @@ document.addEventListener("DOMContentLoaded", () => {
         showRandomQuote();
     }
 
-    setInterval(syncWithServer, 30000); // Sync with server every 30 seconds
+    setInterval(syncQuotes, 30000); // Sync with server every 30 seconds
 });
